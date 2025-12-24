@@ -14,11 +14,9 @@ class _UserListScreenState extends State<UserListScreen> {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
 
-  // ডাটা রাখার জন্য ভেরিয়েবল
   List<User> _allUsers = [];
   List<User> _filteredUsers = [];
 
-  // স্টেট ভেরিয়েবল (Loading, Error)
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -26,11 +24,9 @@ class _UserListScreenState extends State<UserListScreen> {
   void initState() {
     super.initState();
     _fetchUsers();
-    // সার্চ বারে লেখার পরিবর্তন ধরার জন্য লিসেনার
     _searchController.addListener(_onSearchChanged);
   }
 
-  // API থেকে ইউজার আনা
   Future<void> _fetchUsers() async {
     setState(() {
       _isLoading = true;
@@ -41,7 +37,6 @@ class _UserListScreenState extends State<UserListScreen> {
       final users = await _apiService.fetchUsers();
       setState(() {
         _allUsers = users;
-        // শুরুতে সব ইউজার দেখাবে
         _filteredUsers = users;
         _isLoading = false;
       });
@@ -53,7 +48,6 @@ class _UserListScreenState extends State<UserListScreen> {
     }
   }
 
-  // সার্চ লজিক (নাম দিয়ে ফিল্টার)
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -63,9 +57,8 @@ class _UserListScreenState extends State<UserListScreen> {
     });
   }
 
-  // রিফ্রেশ করার ফাংশন (Pull to Refresh)
   Future<void> _refreshUsers() async {
-    _searchController.clear(); // রিফ্রেশের সময় সার্চ ক্লিয়ার হবে
+    _searchController.clear();
     await _fetchUsers();
   }
 
@@ -77,26 +70,42 @@ class _UserListScreenState extends State<UserListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // থিম কালার (Deep Purple)
+    final Color primaryColor = Colors.deepPurple;
+
     return Scaffold(
+      // ১. নরম এবং আধুনিক ব্যাকগ্রাউন্ড কালার
+      backgroundColor: const Color(0xFFF0F2F5),
       appBar: AppBar(
-        title: const Text('Users'),
-        elevation: 2,
+        backgroundColor: Colors.white,
+        elevation: 0, // অ্যাপবারের নিচের শ্যাডো সরানো হয়েছে
+        title: const Text(
+          'Users',
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
+          preferredSize: const Size.fromHeight(70),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search users by name...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.grey.shade200, width: 1),
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search users...',
+                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                  border: InputBorder.none, // ডিফল্ট বর্ডার সরানো
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
             ),
           ),
@@ -104,18 +113,22 @@ class _UserListScreenState extends State<UserListScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: _refreshUsers,
+        color: primaryColor, // রিফ্রেশ আইকনের কালার
+        backgroundColor: Colors.white,
         child: _buildBody(),
       ),
     );
   }
 
   Widget _buildBody() {
-    // ১. যদি লোডিং চলছে
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+        ),
+      );
     }
 
-    // ২. যদি এরর থাকে
     if (_errorMessage != null) {
       return Center(
         child: Padding(
@@ -123,18 +136,34 @@ class _UserListScreenState extends State<UserListScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.error_outline, color: Colors.red, size: 40),
+              ),
+              const SizedBox(height: 20),
               Text(
                 _errorMessage!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
+              const SizedBox(height: 24),
+              ElevatedButton(
                 onPressed: _fetchUsers,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  'Try Again',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
               )
             ],
           ),
@@ -142,21 +171,26 @@ class _UserListScreenState extends State<UserListScreen> {
       );
     }
 
-    // ৩. যদি ডাটা খালি থাকে (সার্চের পর কিছু না পাওয়া গেলে)
     if (_filteredUsers.isEmpty) {
-      return const Center(
-        child: Text(
-          'No users found.',
-          style: TextStyle(fontSize: 18, color: Colors.grey),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 60, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            const Text(
+              'No users found',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ],
         ),
       );
     }
 
-    // ৪. লিস্ট দেখানো
     return ListView.separated(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20), // প্যাডিং এডজাস্ট করা হয়েছে
       itemCount: _filteredUsers.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, __) => const SizedBox(height: 12), // কার্ডের মাঝে ফাঁকা জায়গা
       itemBuilder: (context, index) {
         final user = _filteredUsers[index];
         return _buildUserTile(user);
@@ -165,45 +199,97 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   Widget _buildUserTile(User user) {
-    return Card(
-      elevation: 2, // সামান্য শ্যাডো
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16), // বেশি গোলাকার কর্নার
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04), // খুব হালকা শ্যাডো
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: Colors.deepPurple.shade100,
-          child: Text(
-            user.name[0], // নামের প্রথম অক্ষর
-            style: TextStyle(color: Colors.deepPurple.shade800, fontWeight: FontWeight.bold),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        leading: Container(
+          decoration: BoxDecoration(
+            // গ্রেডিয়েন্ট ব্যাকগ্রাউন্ড
+            gradient: const LinearGradient(
+              colors: [Colors.deepPurple, Colors.purpleAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent, // ট্রান্সপারেন্ট যাতে গ্রেডিয়েন্ট দেখা যায়
+            child: Text(
+              user.name[0],
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ),
         ),
         title: Text(
           user.name,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Colors.black87,
+          ),
         ),
         subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
+          padding: const EdgeInsets.only(top: 6.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                user.email,
-                style: const TextStyle(fontSize: 13),
+              Row(
+                children: [
+                  Icon(Icons.email_outlined, size: 14, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      user.email,
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              // রিকোয়ারমেন্ট অনুযায়ী কোম্পানির নাম যোগ করা হয়েছে
-              Text(
-                user.company.name,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w500,
-                ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.business, size: 14, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      user.company.name,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+        trailing: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+        ),
         onTap: () {
           Navigator.push(
             context,
