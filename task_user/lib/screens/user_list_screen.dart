@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Provider ইমপোর্ট
+import 'package:provider/provider.dart';
 import 'package:task_user/theme/theme_provider.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
@@ -72,21 +72,18 @@ class _UserListScreenState extends State<UserListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // থিম প্রোভাইডার অ্যাক্সেস করা
+
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      // ডায়নামিক ব্যাকগ্রাউন্ড কালার
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        // ডায়নামিক অ্যাপবার কালার
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         title: const Text('Users'),
         actions: [
-          // ডার্ক মোড টগল বাটন
           IconButton(
             icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
             onPressed: () {
@@ -99,7 +96,7 @@ class _UserListScreenState extends State<UserListScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Container(
-              // সার্চ বারের কালার ডায়নামিক
+
               decoration: BoxDecoration(
                 color: isDark ? Colors.grey[800] : Colors.grey[100],
                 borderRadius: BorderRadius.circular(30),
@@ -210,7 +207,7 @@ class _UserListScreenState extends State<UserListScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        // কার্ডের কালার ডায়নামিক
+
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
